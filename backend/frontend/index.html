@@ -1,32 +1,93 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>SkillMatch</title>
-<link rel="stylesheet" href="/static/style.css">
-</head>
+    <meta charset="UTF-8">
+    <title>Overwatch Matchmaking</title>
 
+    <style>
+        body {
+            font-family: Arial;
+            background: #1e1e1e;
+            color: white;
+            padding: 30px;
+        }
+
+        button {
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .player {
+            background: #333;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
 <body>
 
-<div class="sidebar">
-    <h2>SkillMatch</h2>
-    <p>Explorar</p>
-    <p>Top Ranking</p>
-    <p>Coach</p>
-</div>
+    <h1>Overwatch Matchmaking</h1>
 
-<div class="main">
-    <h1>OVERWATCH</h1>
+    <button onclick="buscarPlayers()">
+        Buscar Jogadores
+    </button>
 
-    <h2>Jogadores Disponíveis</h2>
-    <div id="players"></div>
+    <button onclick="buscarPartida()">
+        Encontrar Partida
+    </button>
 
-    <button onclick="findMatch()">Entrar em Time</button>
+    <div id="resultado"></div>
 
-    <h2>Seu Time</h2>
-    <div id="team"></div>
-</div>
+    <script>
 
-<script src="/static/script.js"></script>
+        async function buscarPlayers() {
+
+            const response = await fetch("/players")
+
+            const data = await response.json()
+
+            let html = "<h2>Jogadores</h2>"
+
+            data.forEach(player => {
+
+                html += `
+                    <div class="player">
+                        <strong>${player.name}</strong><br>
+                        Rank: ${player.rank}<br>
+                        Winrate: ${player.winrate}%
+                    </div>
+                `
+            })
+
+            document.getElementById("resultado").innerHTML = html
+        }
+
+
+        async function buscarPartida() {
+
+            const response = await fetch("/matchmaking/Melissa")
+
+            const data = await response.json()
+
+            let html = "<h2>Time Encontrado</h2>"
+
+            data.forEach(player => {
+
+                html += `
+                    <div class="player">
+                        <strong>${player.name}</strong><br>
+                        Rank: ${player.rank}<br>
+                        Winrate: ${player.winrate}%
+                    </div>
+                `
+            })
+
+            document.getElementById("resultado").innerHTML = html
+        }
+
+    </script>
+
 </body>
 </html>

@@ -4,6 +4,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import random
 
+from backend.database import players_collection
+
 app = FastAPI()
 
 app.add_middleware(
@@ -16,16 +18,6 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="backend/frontend"), name="static")
 
-players = [
-    {"id": 1, "name": "Você", "rank": "Platinum", "winrate": 58},
-    {"id": 2, "name": "SemNick", "rank": "Gold", "winrate": 52},
-    {"id": 3, "name": "Marcão", "rank": "Gold", "winrate": 55},
-    {"id": 4, "name": "TiroCerto", "rank": "Platinum", "winrate": 60},
-    {"id": 5, "name": "Belinha", "rank": "Gold", "winrate": 57},
-    {"id": 6, "name": "ShadowX", "rank": "Diamond", "winrate": 62},
-    {"id": 7, "name": "GhostAim", "rank": "Platinum", "winrate": 59},
-    {"id": 8, "name": "LunaFPS", "rank": "Gold", "winrate": 54},
-]
 
 @app.get("/", response_class=HTMLResponse)
 def home():
@@ -33,25 +25,70 @@ def home():
         return f.read()
 
 
+# LISTAR JOGADORES
 @app.get("/players")
 def get_players():
+
+    players = []
+
+    for player in players_collection.find():
+
+        players.append({
+            "id": str(player["_id"]),
+            "name": player["name"],
+            "rank": player["rank"],
+            "winrate": player["winrate"]
+        })
+
     return players
 
 
-@app.get("/matchmaking/{user_id}")
-def matchmaking(user_id: int):
-    user = next((p for p in players if p["id"] == user_id), None)
+# CRIAR JOGADOR
+@app.post("/players")
+def create_player(player: dict):
+
+    result = players_collection.insert_one(player)
+
+    return {
+        "message": "Player criado com sucesso",
+        "id": str(result.inserted_id)
+    }
+
+
+# MATCHMAKING
+@app.get("/matchmaking/{player_name}")
+def matchmaking(player_name: str):
+
+    user = players_collection.find_one({
+        "name": player_name
+    })
 
     if not user:
-        return {"error": "User not found"}
+        return {"error": "Usuário não encontrado"}
 
-    # Remove o próprio usuário da lista
-    others = [p for p in players if p["id"] != user_id]
+    others = list(players_collection.find({
+        "name": {"$ne": player_name}
+    }))
 
-    # Escolhe 4 aleatórios
+    if len(others) < 4:
+        return {
+            "error": "Jogadores insuficientes para criar partida"
+        }
+
     team_random = random.sample(others, 4)
 
-    # Usuário sempre primeiro
-    team = [user] + team_random
+    team = [{
+        "name": user["name"],
+        "rank": user["rank"],
+        "winrate": user["winrate"]
+    }]
+
+    for p in team_random:
+
+        team.append({
+            "name": p["name"],
+            "rank": p["rank"],
+            "winrate": p["winrate"]
+        })
 
     return team

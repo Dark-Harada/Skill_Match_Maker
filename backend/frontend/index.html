@@ -13,7 +13,6 @@ body {
     color: white;
 }
 
-/* SIDEBAR */
 .sidebar {
     width: 220px;
     height: 100vh;
@@ -22,60 +21,34 @@ body {
     padding: 20px;
 }
 
-/* HEADER */
 .header {
     margin-left: 220px;
     height: 80px;
     background: #2a2a3d;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: 0 30px;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
     gap: 10px;
 }
 
-.login {
-    background: transparent;
-    border: 1px solid #5a5afc;
-    color: #5a5afc;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.register {
-    background: #5a5afc;
-    border: none;
-    color: white;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-/* SEARCH */
-.search {
-    margin-left: 100px;
-    background: #1e1e2f;
-    padding: 10px 20px;
-    border-radius: 20px;
-    border: none;
-    color: white;
-}
-
-/* PROFILE */
 .profile {
-    width: 40px;
-    height: 40px;
-    background: #444;
+    width: 42px;
+    height: 42px;
+    background: #777;
     border-radius: 50%;
 }
 
-/* MAIN */
+.logout {
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid #ff5a5a;
+    color: #ff5a5a;
+    display: none;
+}
+
 .main {
     margin-left: 220px;
     padding: 40px;
@@ -84,19 +57,42 @@ body {
 }
 
 .content {
-    width: 100%;
     max-width: 900px;
+    width: 100%;
 }
 
-/* PLAYERS */
-.player {
-    background: #2a2a3d;
-    padding: 12px;
+h1 {
+    font-size: 48px;
+}
+
+.auth-buttons {
     margin-top: 10px;
-    border-radius: 10px;
+    display: flex;
+    gap: 10px;
 }
 
-/* BOTÃO */
+.login, .register {
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.login {
+    background: transparent;
+    border: 1px solid #5a5afc;
+    color: #5a5afc;
+}
+
+.register {
+    background: #5a5afc;
+    color: white;
+    border: none;
+}
+
+.hidden {
+    display: none;
+}
+
 .match-btn {
     margin-top: 20px;
     padding: 12px;
@@ -108,43 +104,47 @@ body {
     display: none;
 }
 
-/* 🔥 MODAL CORRIGIDO */
-.modal-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    background: rgba(0,0,0,0.75);
-
+#teamTitle {
     display: none;
-    justify-content: center;
-    align-items: center;
-
-    z-index: 9999; /* 🔥 garante que fique por cima */
+    margin-top: 20px;
 }
 
-/* MODAL */
+.player {
+    background: #2a2a3d;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+.modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
 .modal {
     background: #2a2a3d;
     padding: 30px;
     border-radius: 12px;
     width: 320px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
 }
 
-.modal input {
+.modal input, .modal select {
     width: 85%;
     padding: 10px;
     margin-top: 10px;
     border-radius: 6px;
     border: none;
     text-align: center;
+    background: #1e1e2f;
+    color: white;
 }
 
 .modal button {
@@ -173,13 +173,8 @@ body {
 </div>
 
 <div class="header">
-    <input class="search" placeholder="Pesquisar...">
-
-    <div class="header-right">
-        <button class="login" onclick="abrirLogin()">Login</button>
-        <button class="register" onclick="abrirCadastro()">Criar Conta</button>
-        <div class="profile"></div>
-    </div>
+    <button class="logout" id="logoutBtn" onclick="logout()">Logout</button>
+    <div class="profile"></div>
 </div>
 
 <div class="main">
@@ -187,11 +182,16 @@ body {
 
         <h1>OVERWATCH</h1>
 
+        <div class="auth-buttons" id="authButtons">
+            <button class="login" onclick="abrirLogin()">Login</button>
+            <button class="register" onclick="abrirCadastro()">Criar Conta</button>
+        </div>
+
         <button class="match-btn" id="matchBtn" onclick="buscarPartida()">
             Entrar em Time
         </button>
 
-        <h2>Time Encontrado</h2>
+        <h2 id="teamTitle">Time Encontrado</h2>
         <div id="resultado"></div>
 
     </div>
@@ -201,10 +201,8 @@ body {
 <div class="modal-bg" id="loginModal">
     <div class="modal">
         <h2>Login</h2>
-
         <input id="login_name" placeholder="Nome">
         <input id="login_password" type="password" placeholder="Senha">
-
         <button onclick="login()">Entrar</button>
         <button class="close" onclick="fecharModais()">Fechar</button>
     </div>
@@ -217,8 +215,25 @@ body {
 
         <input id="reg_name" placeholder="Nome">
         <input id="reg_password" type="password" placeholder="Senha">
-        <input id="reg_rank" placeholder="Rank">
-        <input id="reg_role" placeholder="Role">
+
+        <select id="reg_rank">
+            <option value="">Selecione o Rank</option>
+            <option>Bronze</option>
+            <option>Prata</option>
+            <option>Ouro</option>
+            <option>Platina</option>
+            <option>Diamante</option>
+            <option>Mestre</option>
+            <option>Grão-Mestre</option>
+        </select>
+
+        <select id="reg_role">
+            <option value="">Selecione a Role</option>
+            <option>Tanque</option>
+            <option>Dano</option>
+            <option>Suporte</option>
+        </select>
+
         <input id="reg_winrate" placeholder="Winrate (%)">
 
         <button onclick="criarConta()">Criar Conta</button>
@@ -226,9 +241,54 @@ body {
     </div>
 </div>
 
+<!-- 🎬 VIDEO MODAL -->
+<div class="modal-bg" id="videoModal" style="display: flex;">
+    <div class="modal" style="width: 80%; max-width: 900px; padding: 20px; position: relative;">
+
+        <!-- BOTÃO PULAR (AGORA MAIS ACIMA E FORA DO VÍDEO) -->
+        <button onclick="fecharVideo()" 
+        style="
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            background: #1e1e2f;
+            border: 1px solid #5a5afc;
+            color: #5a5afc;
+            padding: 10px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            ">
+            Pular
+        </button>
+
+        <!-- VIDEO COM CONTROLES NATIVOS -->
+        <video id="introVideo" autoplay controls style="width: 100%; border-radius: 12px;">
+            <source src="/static/Editado.mp4" type="video/mp4">
+        </video>
+
+    </div>
+</div>
+
 <script>
 
 let usuarioLogado = null
+
+window.onload = function() {
+    const savedUser = localStorage.getItem("usuario")
+
+    if (savedUser) {
+        usuarioLogado = savedUser
+        aplicarLoginUI()
+    }
+}
+
+function aplicarLoginUI() {
+    document.getElementById("authButtons").classList.add("hidden")
+    document.getElementById("matchBtn").style.display = "block"
+    document.getElementById("logoutBtn").style.display = "block"
+}
 
 function abrirLogin() {
     document.getElementById("loginModal").style.display = "flex"
@@ -243,6 +303,28 @@ function fecharModais() {
     document.getElementById("cadastroModal").style.display = "none"
 }
 
+function fecharVideo() {
+    const modal = document.getElementById("videoModal")
+    const video = document.getElementById("introVideo")
+
+    if (video) {
+        video.pause()                // para o vídeo
+        video.currentTime = 0        // volta pro início
+        video.src = ""               // REMOVE o source (isso mata o áudio 100%)
+        video.load()                 // força reset do player
+    }
+
+    modal.style.display = "none"
+}
+
+function ativarSom() {
+    const video = document.getElementById("introVideo")
+    video.muted = false
+    video.play()
+}
+
+document.getElementById("introVideo")?.addEventListener("ended", fecharVideo)
+
 async function login() {
 
     const name = document.getElementById("login_name").value
@@ -256,27 +338,41 @@ async function login() {
 
     const data = await response.json()
 
-    if (data.error) {
-        alert(data.error)
-        return
-    }
+    if (data.error) return
 
     usuarioLogado = name
 
-    alert("Login realizado!")
+    localStorage.setItem("usuario", name)
 
-    document.getElementById("matchBtn").style.display = "block"
-
+    aplicarLoginUI()
     fecharModais()
+}
+
+function logout() {
+
+    usuarioLogado = null
+
+    localStorage.removeItem("usuario")
+
+    document.getElementById("authButtons").classList.remove("hidden")
+    document.getElementById("matchBtn").style.display = "none"
+    document.getElementById("logoutBtn").style.display = "none"
+    document.getElementById("teamTitle").style.display = "none"
+    document.getElementById("resultado").innerHTML = ""
 }
 
 async function criarConta() {
 
+    const rank = document.getElementById("reg_rank").value
+    const role = document.getElementById("reg_role").value
+
+    if (!rank || !role) return
+
     const player = {
         name: document.getElementById("reg_name").value,
         password: document.getElementById("reg_password").value,
-        rank: document.getElementById("reg_rank").value,
-        role: document.getElementById("reg_role").value,
+        rank: rank,
+        role: role,
         winrate: parseInt(document.getElementById("reg_winrate").value)
     }
 
@@ -286,7 +382,6 @@ async function criarConta() {
         body: JSON.stringify(player)
     })
 
-    alert("Conta criada!")
     fecharModais()
 }
 
@@ -295,14 +390,17 @@ async function buscarPartida() {
     const response = await fetch(`/matchmaking/${usuarioLogado}`)
     const data = await response.json()
 
-    let html = "<h3>Seu Time:</h3>"
+    document.getElementById("teamTitle").style.display = "block"
+
+    let html = ""
 
     data.forEach(player => {
         html += `
             <div class="player">
                 <strong>${player.name}</strong><br>
                 Rank: ${player.rank}<br>
-                Winrate: ${player.winrate}%
+                Winrate: ${player.winrate}%<br>
+                Role: ${player.role}
             </div>
         `
     })

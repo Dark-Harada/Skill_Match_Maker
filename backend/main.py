@@ -52,6 +52,8 @@ def login(data: dict):
 @app.post("/players")
 async def create_player(data: dict):
 
+    print("CRIANDO CONTA", data)
+
     username = data["name"].strip().lower()
 
     existing = players_collection.find_one({

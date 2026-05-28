@@ -1,13 +1,15 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+
 import random
 
 from backend.database import players_collection
 
 app = FastAPI()
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,21 +18,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Arquivos estáticos
 app.mount("/static", StaticFiles(directory="backend/frontend"), name="static")
 
 
+# Página inicial
 @app.get("/", response_class=HTMLResponse)
 def home():
     with open("backend/frontend/index.html", encoding="utf-8") as f:
         return f.read()
 
 
-# 🔥 LOGIN
+# LOGIN
 @app.post("/login")
 def login(data: dict):
 
+    username = data["name"].strip().lower()
+
     user = players_collection.find_one({
-        "name": data["name"],
+        "name": username,
         "password": data["password"]
     })
 
@@ -40,26 +46,48 @@ def login(data: dict):
     return {"message": "Login sucesso"}
 
 
+# CRIAR CONTA
 @app.post("/players")
-def create_player(player: dict):
+async def create_player(data: dict):
 
-    players_collection.insert_one(player)
+    username = data["name"].strip().lower()
 
-    return {"message": "Player criado"}
+    existing = players_collection.find_one({
+        "name": username
+    })
+
+    if existing:
+        return {"error": "Usuário já existe"}
+
+    data["name"] = username
+
+    players_collection.insert_one(data)
+
+    return {"message": "Jogador criado"}
 
 
+# MATCHMAKING
 @app.get("/matchmaking/{player_name}")
 def matchmaking(player_name: str):
+
+    player_name = player_name.strip().lower()
 
     user = players_collection.find_one({"name": player_name})
 
     if not user:
         return {"error": "Usuário não encontrado"}
 
-    rank_order = ["Bronze", "Prata", "Ouro", "Platina", "Diamante", "Mestre", "Grão-Mestre"]
+    rank_order = [
+        "Bronze",
+        "Prata",
+        "Ouro",
+        "Platina",
+        "Diamante",
+        "Mestre",
+        "Grão-Mestre"
+    ]
 
     user_rank_index = rank_order.index(user["rank"])
-
 
     def buscar_por_role(role, quantidade):
 
@@ -90,7 +118,6 @@ def matchmaking(player_name: str):
 
         return encontrados[:quantidade]
 
-
     team = []
 
     team.append({
@@ -100,16 +127,13 @@ def matchmaking(player_name: str):
         "role": user["role"]
     })
 
-
     roles_needed = {
         "Tanque": 1,
         "Dano": 2,
         "Suporte": 2
     }
 
-
     roles_needed[user["role"]] -= 1
-
 
     for role, qtd in roles_needed.items():
 

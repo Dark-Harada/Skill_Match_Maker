@@ -71,19 +71,26 @@ h1 {
     gap: 10px;
 }
 
-.login, .register {
-    padding: 10px 16px;
-    border-radius: 8px;
+.login-btn, .register-btn {
+    padding: 12px 18px;
+    border-radius: 10px;
     cursor: pointer;
+    font-size: 16px;
+    transition: 0.2s;
 }
 
-.login {
+.login-btn:hover,
+.register-btn:hover {
+    transform: scale(1.03);
+}
+
+.login-btn {
     background: transparent;
     border: 1px solid #5a5afc;
     color: #5a5afc;
 }
 
-.register {
+.register-btn {
     background: #5a5afc;
     color: white;
     border: none;
@@ -95,13 +102,14 @@ h1 {
 
 .match-btn {
     margin-top: 20px;
-    padding: 12px;
+    padding: 14px 20px;
     background: #5a5afc;
     border: none;
     border-radius: 10px;
     color: white;
     cursor: pointer;
     display: none;
+    font-size: 16px;
 }
 
 #teamTitle {
@@ -136,7 +144,8 @@ h1 {
     align-items: center;
 }
 
-.modal input, .modal select {
+.modal input,
+.modal select {
     width: 85%;
     padding: 10px;
     margin-top: 10px;
@@ -173,7 +182,10 @@ h1 {
 </div>
 
 <div class="header">
-    <button class="logout" id="logoutBtn" onclick="logout()">Logout</button>
+    <button class="logout" id="logoutBtn" onclick="logout()">
+        Logout
+    </button>
+
     <div class="profile"></div>
 </div>
 
@@ -183,8 +195,15 @@ h1 {
         <h1>OVERWATCH</h1>
 
         <div class="auth-buttons" id="authButtons">
-            <button class="login" onclick="abrirLogin()">Login</button>
-            <button class="register" onclick="abrirCadastro()">Criar Conta</button>
+
+            <button class="login-btn" onclick="abrirLogin()">
+                Login
+            </button>
+
+            <button class="register-btn" onclick="abrirCadastro()">
+                Criar Conta
+            </button>
+
         </div>
 
         <button class="match-btn" id="matchBtn" onclick="buscarPartida()">
@@ -192,6 +211,7 @@ h1 {
         </button>
 
         <h2 id="teamTitle">Time Encontrado</h2>
+
         <div id="resultado"></div>
 
     </div>
@@ -199,21 +219,33 @@ h1 {
 
 <!-- LOGIN -->
 <div class="modal-bg" id="loginModal">
+
     <div class="modal">
+
         <h2>Login</h2>
+
         <input id="login_name" placeholder="Nome">
+
         <input id="login_password" type="password" placeholder="Senha">
+
         <button onclick="login()">Entrar</button>
-        <button class="close" onclick="fecharModais()">Fechar</button>
+
+        <button class="close" onclick="fecharModais()">
+            Fechar
+        </button>
+
     </div>
 </div>
 
 <!-- CADASTRO -->
 <div class="modal-bg" id="cadastroModal">
+
     <div class="modal">
+
         <h2>Criar Conta</h2>
 
         <input id="reg_name" placeholder="Nome">
+
         <input id="reg_password" type="password" placeholder="Senha">
 
         <select id="reg_rank">
@@ -236,37 +268,13 @@ h1 {
 
         <input id="reg_winrate" placeholder="Winrate (%)">
 
-        <button onclick="criarConta()">Criar Conta</button>
-        <button class="close" onclick="fecharModais()">Fechar</button>
-    </div>
-</div>
-
-<!-- 🎬 VIDEO MODAL -->
-<div class="modal-bg" id="videoModal" style="display: flex;">
-    <div class="modal" style="width: 80%; max-width: 900px; padding: 20px; position: relative;">
-
-        <!-- BOTÃO PULAR (AGORA MAIS ACIMA E FORA DO VÍDEO) -->
-        <button onclick="fecharVideo()" 
-        style="
-            position: fixed;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10000;
-            background: #1e1e2f;
-            border: 1px solid #5a5afc;
-            color: #5a5afc;
-            padding: 10px 18px;
-            border-radius: 12px;
-            cursor: pointer;
-            ">
-            Pular
+        <button onclick="criarConta()">
+            Criar Conta
         </button>
 
-        <!-- VIDEO COM CONTROLES NATIVOS -->
-        <video id="introVideo" autoplay controls style="width: 100%; border-radius: 12px;">
-            <source src="/static/Editado.mp4" type="video/mp4">
-        </video>
+        <button class="close" onclick="fecharModais()">
+            Fechar
+        </button>
 
     </div>
 </div>
@@ -276,76 +284,84 @@ h1 {
 let usuarioLogado = null
 
 window.onload = function() {
+
     const savedUser = localStorage.getItem("usuario")
 
     if (savedUser) {
+
         usuarioLogado = savedUser
+
         aplicarLoginUI()
     }
 }
 
 function aplicarLoginUI() {
+
     document.getElementById("authButtons").classList.add("hidden")
+
     document.getElementById("matchBtn").style.display = "block"
+
     document.getElementById("logoutBtn").style.display = "block"
 }
 
 function abrirLogin() {
+
     document.getElementById("loginModal").style.display = "flex"
 }
 
 function abrirCadastro() {
+
     document.getElementById("cadastroModal").style.display = "flex"
 }
 
 function fecharModais() {
+
     document.getElementById("loginModal").style.display = "none"
+
     document.getElementById("cadastroModal").style.display = "none"
 }
-
-function fecharVideo() {
-    const modal = document.getElementById("videoModal")
-    const video = document.getElementById("introVideo")
-
-    if (video) {
-        video.pause()                // para o vídeo
-        video.currentTime = 0        // volta pro início
-        video.src = ""               // REMOVE o source (isso mata o áudio 100%)
-        video.load()                 // força reset do player
-    }
-
-    modal.style.display = "none"
-}
-
-function ativarSom() {
-    const video = document.getElementById("introVideo")
-    video.muted = false
-    video.play()
-}
-
-document.getElementById("introVideo")?.addEventListener("ended", fecharVideo)
 
 async function login() {
 
     const name = document.getElementById("login_name").value
+
     const password = document.getElementById("login_password").value
 
-    const response = await fetch("/login", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ name, password })
-    })
+    try {
 
-    const data = await response.json()
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name, password })
+        })
 
-    if (data.error) return
+        const data = await response.json()
 
-    usuarioLogado = name
+        if (data.error) {
 
-    localStorage.setItem("usuario", name)
+            alert(data.error)
 
-    aplicarLoginUI()
-    fecharModais()
+            return
+        }
+
+        usuarioLogado = name.toLowerCase()
+
+        localStorage.setItem("usuario", usuarioLogado)
+
+        aplicarLoginUI()
+
+        fecharModais()
+
+        alert("Login realizado com sucesso!")
+
+    } catch (error) {
+
+        console.error(error)
+
+        alert("Erro ao conectar com o servidor")
+    }
 }
 
 function logout() {
@@ -355,18 +371,28 @@ function logout() {
     localStorage.removeItem("usuario")
 
     document.getElementById("authButtons").classList.remove("hidden")
+
     document.getElementById("matchBtn").style.display = "none"
+
     document.getElementById("logoutBtn").style.display = "none"
+
     document.getElementById("teamTitle").style.display = "none"
+
     document.getElementById("resultado").innerHTML = ""
 }
 
 async function criarConta() {
 
     const rank = document.getElementById("reg_rank").value
+
     const role = document.getElementById("reg_role").value
 
-    if (!rank || !role) return
+    if (!rank || !role) {
+
+        alert("Preencha rank e role")
+
+        return
+    }
 
     const player = {
         name: document.getElementById("reg_name").value,
@@ -376,18 +402,41 @@ async function criarConta() {
         winrate: parseInt(document.getElementById("reg_winrate").value)
     }
 
-    await fetch("/players", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(player)
-    })
+    try {
 
-    fecharModais()
+        const response = await fetch("/players", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(player)
+        })
+
+        const data = await response.json()
+
+        if (data.error) {
+
+            alert(data.error)
+
+            return
+        }
+
+        fecharModais()
+
+        alert("Conta criada com sucesso!")
+
+    } catch (error) {
+
+        console.error(error)
+
+        alert("Erro ao criar conta")
+    }
 }
 
 async function buscarPartida() {
 
     const response = await fetch(`/matchmaking/${usuarioLogado}`)
+
     const data = await response.json()
 
     document.getElementById("teamTitle").style.display = "block"
@@ -395,6 +444,7 @@ async function buscarPartida() {
     let html = ""
 
     data.forEach(player => {
+
         html += `
             <div class="player">
                 <strong>${player.name}</strong><br>
@@ -412,3 +462,4 @@ async function buscarPartida() {
 
 </body>
 </html>
+

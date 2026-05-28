@@ -1,5 +1,7 @@
+# BACKEND (`main.py`)
+
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -148,3 +150,4 @@ def matchmaking(player_name: str):
             })
 
     return team
+
